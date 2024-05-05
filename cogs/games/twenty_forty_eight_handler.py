@@ -106,33 +106,30 @@ class TwentyFortyEight:
                         mainBoard: bool):
         copy_board = copy.deepcopy(self.board_list)
         moved = False
-        if direction == 'up' or direction == 'left':
-            start = self.board_size_y
+        if direction == 'down' or direction == 'right':
+            start = self.board_size_y - 1
             end = -1
             step = -1
-            sub_range = 1
-
-
         else:
-            if direction == 'down':
+            if direction == 'up':
                 end = self.board_size_y
             else:
                 end = self.board_size_x
             step = 1
-            sub_range = 0
             start = 0
         if direction == 'up' or direction == 'down':
 
             for x in range(self.board_size_x):
-                for y in range(start - sub_range, end, step):
+                for y in range(start, end, step):
                     tile = copy_board[x][y]
                     if copy_board[x][y] == self.empty_char:
                         continue
 
                     if direction == 'up':
-                        possible_directions = range(y - 1, end, step)
+                        possible_directions = range(y - 1, -1, -1)
                     else:  # down
                         possible_directions = range(y + 1, self.board_size_y, 1)
+                        print(list(possible_directions))
 
                     for possible_y in possible_directions:
                         if copy_board[x][possible_y] == self.empty_char:
