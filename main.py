@@ -27,8 +27,12 @@ async def on_connect():
 
     for sub_folder in cogs_json["sub_folders"]:
         for file in cogs_json["sub_folders"][sub_folder]["files"]:
+            print(file)
             file_path = f"{cogs_folder.replace('/', '').replace('.', '')}.{sub_folder}.{file}"
             print(f"Loaded {file_path}")
-            bot.load_extensions(file_path)
+            bot.load_extension(file_path)
+
+    await bot.sync_commands()
+    print("Synced commands!")
 
 bot.run(os.getenv("BOT_TOKEN"))
