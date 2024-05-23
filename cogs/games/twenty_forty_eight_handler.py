@@ -81,7 +81,6 @@ class TwentyFortyEight:
 
     async def up(self):
         await self.move_tile('up', True)
-        print('up')
 
     async def check_tile(self, position):
         """
@@ -106,47 +105,79 @@ class TwentyFortyEight:
                         mainBoard: bool):
         copy_board = copy.deepcopy(self.board_list)
         moved = False
-        if direction == 'down' or direction == 'right':
+        if direction == 'down':
             start = self.board_size_y - 1
             end = -1
             step = -1
-        else:
-            if direction == 'up':
-                end = self.board_size_y
-            else:
-                end = self.board_size_x
+        elif direction == 'up':
+            end = self.board_size_y
             step = 1
             start = 0
-        if direction == 'up' or direction == 'down':
+        elif direction == 'right':
+            end = -1
+            step = -1
+            start = self.board_size_x-1
+        else:  # left
+            end = self.board_size_x
+            step = 1
+            start = 0
+        for i in range(
+                self.board_size_x):  # So that it loops over and makes sure that in one move the maximum collisions happen
+            if direction == 'up' or direction == 'down':
+                for x in range(self.board_size_x):
+                    for y in range(start, end, step):
+                        tile = copy_board[x][y]
+                        if copy_board[x][y] == self.empty_char:
+                            continue
 
-            for x in range(self.board_size_x):
-                for y in range(start, end, step):
-                    tile = copy_board[x][y]
-                    if copy_board[x][y] == self.empty_char:
-                        continue
+                        if direction == 'up':
+                            possible_directions = range(y - 1, -1, -1)
+                        else:  # down
+                            possible_directions = range(y + 1, self.board_size_y, 1)
 
-                    if direction == 'up':
-                        possible_directions = range(y - 1, -1, -1)
-                    else:  # down
-                        possible_directions = range(y + 1, self.board_size_y, 1)
-                        print(list(possible_directions))
+                        for possible_y in possible_directions:
+                            if copy_board[x][possible_y] == self.empty_char:
 
-                    for possible_y in possible_directions:
-                        if copy_board[x][possible_y] == self.empty_char:
+                                copy_board[x][y] = self.empty_char
+                                copy_board[x][possible_y] = str(tile)
+                                y = possible_y
+                                moved = True
 
-                            copy_board[x][y] = self.empty_char
-                            copy_board[x][possible_y] = str(tile)
-                            y = possible_y
-                            moved = True
+                            elif int(copy_board[x][possible_y]) == int(copy_board[x][y]):
+                                copy_board[x][y] = self.empty_char
+                                copy_board[x][possible_y] = str(int(tile) * 2)
+                                moved = True
+                                break
 
-                        elif int(copy_board[x][possible_y]) == int(copy_board[x][y]):
-                            copy_board[x][y] = self.empty_char
-                            copy_board[x][possible_y] = str(int(tile) * 2)
-                            moved = True
-                            break
+                            else:
+                                break  # tile collided
+            else:
+                for y in range(self.board_size_y):
+                    for x in range(start, end, step):  # Reversed because it needs to check for each x per y instead of y per x (so that it doesn't move by one each time)
+                        tile = copy_board[x][y]
+                        if copy_board[x][y] == self.empty_char:
+                            continue
 
-                        else:
-                            break  # tile collided
+                        if direction == 'left':
+                            possible_directions = range(x - 1, -1, -1)
+                        else:  # right
+                            possible_directions = range(x + 1, self.board_size_x, 1)
+
+                        for possible_x in possible_directions:
+                            if copy_board[possible_x][y] == self.empty_char:
+
+                                copy_board[x][y] = self.empty_char
+                                copy_board[possible_x][y] = str(tile)
+                                x = possible_x
+                                moved = True
+
+                            elif int(copy_board[possible_x][y]) == int(copy_board[x][y]):
+                                copy_board[x][y] = self.empty_char
+                                copy_board[possible_x][y] = str(int(tile) * 2)
+                                moved = True
+                                break
+                            else:
+                                break  # tile collided
 
         self.board_list = copy_board
         if moved:

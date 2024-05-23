@@ -16,7 +16,7 @@ bot = discord.Bot(intents=intents)
 
 
 # --- Basic Listeners ---
-@bot.listen()
+@bot.listen()  # Listener to prevent overwrite
 async def on_connect():
     # -- Setup Cogs --
     with open(os.path.abspath("./setup.json"), "r") as setup_json:  # Use the setup folder to get the cogs folder
@@ -34,5 +34,11 @@ async def on_connect():
 
     await bot.sync_commands()
     print("Synced commands!")
+
+
+@bot.event
+async def on_ready():
+    print("Nestling Bot is ready!")
+
 
 bot.run(os.getenv("BOT_TOKEN"))
