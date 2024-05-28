@@ -4,7 +4,7 @@ import copy
 
 # --- 2048 Class Handler ---
 class TwentyFortyEight:
-    def __init__(self, board_size_x=4, board_size_y=4, empty_char="⬜"):
+    def __init__(self, board_size_x=4, board_size_y=4, empty_char="*"):
         # --- Default Vars ---
         self.empty_char = empty_char
         self.board_size_x = board_size_x
@@ -53,7 +53,7 @@ class TwentyFortyEight:
         for y in range(self.board_size_y):
             final_string += '\n'
             for x in range(self.board_size_x):
-                final_string += str(self.board_list[x][y]) + '\t'
+                final_string += str(self.board_list[x][y]) + " "
 
         return final_string
 

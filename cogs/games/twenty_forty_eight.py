@@ -69,7 +69,7 @@ class twenty_forty_eight_command(commands.Cog):
         game = await twenty_forty_eight_handler.create_2048(board_size_x=horizontal_size, board_size_y=vertical_size)
         embed = discord.Embed(
             title="2048",
-            description=await game.decrypt_board(),
+            description=f"```\n{await game.decrypt_board()}```",
             colour=discord.Colour.random()
         )
         embed.set_author(name=ctx.user, icon_url=ctx.user.avatar.url)
