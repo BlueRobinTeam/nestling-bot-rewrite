@@ -101,10 +101,8 @@ class TwentyFortyEight:
                 return True  # Collided
         return False  # Did not collide
 
-    async def move_tile(self, direction,
-                        mainBoard: bool):
+    async def collide_tiles(self, direction, combine: bool):
         copy_board = copy.deepcopy(self.board_list)
-        moved = False
         if direction == 'down':
             start = self.board_size_y - 1
             end = -1
@@ -116,71 +114,83 @@ class TwentyFortyEight:
         elif direction == 'right':
             end = -1
             step = -1
-            start = self.board_size_x-1
+            start = self.board_size_x - 1
         else:  # left
             end = self.board_size_x
             step = 1
             start = 0
-        for i in range(
-                self.board_size_x):  # So that it loops over and makes sure that in one move the maximum collisions happen
-            if direction == 'up' or direction == 'down':
-                for x in range(self.board_size_x):
-                    for y in range(start, end, step):
-                        tile = copy_board[x][y]
-                        if copy_board[x][y] == self.empty_char:
-                            continue
 
-                        if direction == 'up':
-                            possible_directions = range(y - 1, -1, -1)
-                        else:  # down
-                            possible_directions = range(y + 1, self.board_size_y, 1)
+        moved = False  # used to determine if tiles moved so that we can use this to put down new tiles if needed
 
-                        for possible_y in possible_directions:
-                            if copy_board[x][possible_y] == self.empty_char:
+        # --- Move tiles to new position (no collision/combination with other tiles) ---
+        if direction == 'up' or direction == 'down':
+            for x in range(self.board_size_x):
+                for y in range(start, end, step):
+                    tile = copy_board[x][y]
+                    if copy_board[x][y] == self.empty_char:
+                        continue
 
+                    if direction == 'up':
+                        possible_directions = range(y - 1, -1, -1)
+                    else:  # down
+                        possible_directions = range(y + 1, self.board_size_y, 1)
+
+                    for possible_y in possible_directions:
+                        if copy_board[x][possible_y] == self.empty_char:
+                            if not combine:
                                 copy_board[x][y] = self.empty_char
                                 copy_board[x][possible_y] = str(tile)
                                 y = possible_y
-                                moved = True
+                                moved = True  # Tiles moved
 
-                            elif int(copy_board[x][possible_y]) == int(copy_board[x][y]):
+                        elif int(copy_board[x][possible_y]) == int(copy_board[x][y]):
+                            if combine:
                                 copy_board[x][y] = self.empty_char
                                 copy_board[x][possible_y] = str(int(tile) * 2)
                                 moved = True
                                 break
 
-                            else:
-                                break  # tile collided
-            else:
-                for y in range(self.board_size_y):
-                    for x in range(start, end, step):  # Reversed because it needs to check for each x per y instead of y per x (so that it doesn't move by one each time)
-                        tile = copy_board[x][y]
-                        if copy_board[x][y] == self.empty_char:
-                            continue
+                        else:
+                            break  # tile collided
+        else:
+            for y in range(self.board_size_y):
+                for x in range(start, end,
+                               step):  # Reversed because it needs to check for each x per y instead of y per x (so that it doesn't move by one each time)
+                    tile = copy_board[x][y]
+                    if copy_board[x][y] == self.empty_char:
+                        continue
 
-                        if direction == 'left':
-                            possible_directions = range(x - 1, -1, -1)
-                        else:  # right
-                            possible_directions = range(x + 1, self.board_size_x, 1)
+                    if direction == 'left':
+                        possible_directions = range(x - 1, -1, -1)
+                    else:  # right
+                        possible_directions = range(x + 1, self.board_size_x, 1)
 
-                        for possible_x in possible_directions:
-                            if copy_board[possible_x][y] == self.empty_char:
-
+                    for possible_x in possible_directions:
+                        if copy_board[possible_x][y] == self.empty_char:
+                            if not combine:
                                 copy_board[x][y] = self.empty_char
                                 copy_board[possible_x][y] = str(tile)
                                 x = possible_x
-                                moved = True
+                                moved = True  # Tiles moved
 
-                            elif int(copy_board[possible_x][y]) == int(copy_board[x][y]):
+                        elif int(copy_board[possible_x][y]) == int(copy_board[x][y]):
+                            if combine:
                                 copy_board[x][y] = self.empty_char
                                 copy_board[possible_x][y] = str(int(tile) * 2)
                                 moved = True
                                 break
-                            else:
-                                break  # tile collided
-
+                        else:
+                            break
         self.board_list = copy_board
-        if moved:
+        return moved
+
+    async def move_tile(self, direction,
+                        mainBoard: bool):
+
+        collided = await self.collide_tiles(direction=direction, combine=False)
+        combined = await self.collide_tiles(direction=direction, combine=True)
+        collided_last = await self.collide_tiles(direction=direction, combine=False)  # Run again to make sure that tiles behind combined ones also move
+        if collided or combined or collided_last:
             await self.add_tile(2)
 
 

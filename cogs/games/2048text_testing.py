@@ -12,6 +12,7 @@ async def main():
     running = True
     while running:
         print(await game.decrypt_board())
+        print(f"Score: {game.score}")
         i = input()
 
         if i == 'stop':
@@ -30,6 +31,8 @@ async def main():
             await game.down()
         elif i == "l" or i == "left":
             await game.left()
+
+
 
 
 def start():
