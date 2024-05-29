@@ -16,7 +16,7 @@ bot = discord.Bot(intents=intents)
 
 
 # --- Basic Listeners ---
-@bot.listen()  # Listener to prevent overwrite
+@bot.event
 async def on_connect():
     # -- Setup Cogs --
     with open(os.path.abspath("./setup.json"), "r") as setup_json:  # Use the setup folder to get the cogs folder
@@ -39,6 +39,11 @@ async def on_connect():
 @bot.event
 async def on_ready():
     print("Nestling Bot is ready!")
+
+
+@bot.slash_command(name="ping")
+async def ping(ctx):
+    await ctx.respond(f"Hello! My ping is: {bot.latency * 1000}")
 
 
 bot.run(os.getenv("BOT_TOKEN"))

@@ -3,8 +3,7 @@ import discord
 from discord.ext import commands  # for cogs
 from discord.ui import Button, View  # for discord buttons
 # --- File Imports ---
-from cogs.games import twenty_forty_eight_handler
-from cogs.games import twenty_forty_eight_pillow
+from cogs.games.twenty_forty_eight import twenty_forty_eight_handler
 
 
 class TwentyFortyEightButton(Button):
@@ -66,10 +65,14 @@ class twenty_forty_eight_command(commands.Cog):
 
     @commands.slash_command(name="2048", description="Play 2048 on Discord!")
     async def twenty_forty_eight_command(self, ctx,
-                                         empty_character: discord.Option(str, default="*", min_length=1, max_length=1, description="The empty characters of the board"),
-                                         horizontal_size: discord.Option(int, default=4, min_value=2, max_value=10, description="Horizontal size of the board"),
-                                         vertical_size: discord.Option(int, default=4, min_value=2, max_value=10, description="Vertical size of the board")):
-        game = await twenty_forty_eight_handler.create_2048(empty_char=empty_character, board_size_x=horizontal_size, board_size_y=vertical_size)
+                                         empty_character: discord.Option(str, default="*", min_length=1, max_length=1,
+                                                                         description="The empty characters of the board"),
+                                         horizontal_size: discord.Option(int, default=4, min_value=2, max_value=10,
+                                                                         description="Horizontal size of the board"),
+                                         vertical_size: discord.Option(int, default=4, min_value=2, max_value=10,
+                                                                       description="Vertical size of the board")):
+        game = await twenty_forty_eight_handler.create_2048(empty_char=empty_character, board_size_x=horizontal_size,
+                                                            board_size_y=vertical_size)
         embed = discord.Embed(
             title="2048",
             description=f"```\n{await game.decrypt_board()}```",
