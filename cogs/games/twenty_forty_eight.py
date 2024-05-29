@@ -4,6 +4,7 @@ from discord.ext import commands  # for cogs
 from discord.ui import Button, View  # for discord buttons
 # --- File Imports ---
 from cogs.games import twenty_forty_eight_handler
+from cogs.games import twenty_forty_eight_pillow
 
 
 class TwentyFortyEightButton(Button):
