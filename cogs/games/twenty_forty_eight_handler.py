@@ -185,7 +185,7 @@ class TwentyFortyEight:
                                 break
                         else:
                             break
-        self.board_list = [[x.strip('com') for x in y] for y in copy_board]  # Remove com (or combined values) from board list
+        self.board_list = [[x.strip('com') for x in y] for y in copy_board]  # Remove com (or combined values) from board list and update the board list from the copy
         return moved
 
     async def move_tile(self, direction,

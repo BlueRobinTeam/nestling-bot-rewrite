@@ -26,8 +26,8 @@ class TwentyFortyEightButton(Button):
                 await self.game.down()
             embed = discord.Embed(
                 title="2048",
-                description=await self.game.decrypt_board(),
-                colour=interaction.message.embeds[0].colour  # set to same colour as before
+                description=f"```\n{await self.game.decrypt_board()}```",
+                colour=discord.Colour.random()
             )
             embed.set_author(name=self.user, icon_url=self.user.avatar.url)
             embed.set_footer(text=f"Score: {self.game.score}")
@@ -64,9 +64,11 @@ class twenty_forty_eight_command(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="2048", description="Play 2048 on Discord!")
-    async def twenty_forty_eight_command(self, ctx, horizontal_size: discord.Option(int, default=4, min_value=2, max_value=10, description="Horizontal size of the board"),
+    async def twenty_forty_eight_command(self, ctx,
+                                         empty_character: discord.Option(str, default="*", min_length=1, max_length=1, description="The empty characters of the board"),
+                                         horizontal_size: discord.Option(int, default=4, min_value=2, max_value=10, description="Horizontal size of the board"),
                                          vertical_size: discord.Option(int, default=4, min_value=2, max_value=10, description="Vertical size of the board")):
-        game = await twenty_forty_eight_handler.create_2048(board_size_x=horizontal_size, board_size_y=vertical_size)
+        game = await twenty_forty_eight_handler.create_2048(empty_char=empty_character, board_size_x=horizontal_size, board_size_y=vertical_size)
         embed = discord.Embed(
             title="2048",
             description=f"```\n{await game.decrypt_board()}```",
