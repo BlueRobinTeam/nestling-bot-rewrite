@@ -101,7 +101,7 @@ class TwentyFortyEight:
                 return True  # Collided
         return False  # Did not collide
 
-    async def collide_tiles(self, direction, combine: bool):
+    async def collide_tiles(self, direction, combine: bool, register_points: bool):
         copy_board = copy.deepcopy(self.board_list)
         if direction == 'down':
             start = self.board_size_y - 1
@@ -127,7 +127,7 @@ class TwentyFortyEight:
             for x in range(self.board_size_x):
                 for y in range(start, end, step):
                     tile = copy_board[x][y]
-                    if copy_board[x][y] == self.empty_char:
+                    if copy_board[x][y] == self.empty_char or copy_board[x][y].endswith('com'):
                         continue
 
                     if direction == 'up':
@@ -136,7 +136,7 @@ class TwentyFortyEight:
                         possible_directions = range(y + 1, self.board_size_y, 1)
 
                     for possible_y in possible_directions:
-                        if copy_board[x][possible_y] == self.empty_char:
+                        if copy_board[x][possible_y] == self.empty_char or copy_board[x][possible_y].endswith('com'):
                             if not combine:
                                 copy_board[x][y] = self.empty_char
                                 copy_board[x][possible_y] = str(tile)
@@ -146,8 +146,10 @@ class TwentyFortyEight:
                         elif int(copy_board[x][possible_y]) == int(copy_board[x][y]):
                             if combine:
                                 copy_board[x][y] = self.empty_char
-                                copy_board[x][possible_y] = str(int(tile) * 2)
+                                copy_board[x][possible_y] = str(int(tile) * 2) + 'com'  # com is for combined so that it doesn't combine twice
                                 moved = True
+                                if register_points:
+                                    self.score += int(tile) * 2
                                 break
 
                         else:
@@ -155,9 +157,9 @@ class TwentyFortyEight:
         else:
             for y in range(self.board_size_y):
                 for x in range(start, end,
-                               step):  # Reversed because it needs to check for each x per y instead of y per x (so that it doesn't move by one each time)
+                               step):  # Reversed because it needs to check for each x per y instead of y per x (so that it doesn't move by just one each time)
                     tile = copy_board[x][y]
-                    if copy_board[x][y] == self.empty_char:
+                    if copy_board[x][y] == self.empty_char or copy_board[x][y].endswith('com'):
                         continue
 
                     if direction == 'left':
@@ -166,7 +168,7 @@ class TwentyFortyEight:
                         possible_directions = range(x + 1, self.board_size_x, 1)
 
                     for possible_x in possible_directions:
-                        if copy_board[possible_x][y] == self.empty_char:
+                        if copy_board[possible_x][y] == self.empty_char or copy_board[possible_x][y].endswith('com'):
                             if not combine:
                                 copy_board[x][y] = self.empty_char
                                 copy_board[possible_x][y] = str(tile)
@@ -176,20 +178,22 @@ class TwentyFortyEight:
                         elif int(copy_board[possible_x][y]) == int(copy_board[x][y]):
                             if combine:
                                 copy_board[x][y] = self.empty_char
-                                copy_board[possible_x][y] = str(int(tile) * 2)
+                                copy_board[possible_x][y] = str(int(tile) * 2) + 'com'
                                 moved = True
+                                if register_points:
+                                    self.score += int(tile) * 2
                                 break
                         else:
                             break
-        self.board_list = copy_board
+        self.board_list = [[x.strip('com') for x in y] for y in copy_board]  # Remove com (or combined values) from board list
         return moved
 
     async def move_tile(self, direction,
                         mainBoard: bool):
 
-        collided = await self.collide_tiles(direction=direction, combine=False)
-        combined = await self.collide_tiles(direction=direction, combine=True)
-        collided_last = await self.collide_tiles(direction=direction, combine=False)  # Run again to make sure that tiles behind combined ones also move
+        collided = await self.collide_tiles(direction=direction, combine=False, register_points=False)
+        combined = await self.collide_tiles(direction=direction, combine=True, register_points=True)
+        collided_last = await self.collide_tiles(direction=direction, combine=False, register_points=False)  # Run again to make sure that tiles behind combined ones also move
         if collided or combined or collided_last:
             await self.add_tile(2)
 
