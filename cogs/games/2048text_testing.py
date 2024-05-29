@@ -16,7 +16,6 @@ async def main():
         i = input()
 
         if i == 'stop':
-            running = False
             break
 
         if i == 'restart':
@@ -31,8 +30,6 @@ async def main():
             await game.down()
         elif i == "l" or i == "left":
             await game.left()
-
-
 
 
 def start():
