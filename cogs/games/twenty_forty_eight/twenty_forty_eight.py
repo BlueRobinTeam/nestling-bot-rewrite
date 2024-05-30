@@ -35,6 +35,8 @@ class TwentyFortyEightButton(Button):
                 )
                 embed.set_author(name=self.user, icon_url=self.user.avatar.url)
                 embed.set_footer(text=f"Score: {self.game.score}")
+                if self.game.check_dead():
+                    return await interaction.message.edit(embed=embed)
                 await interaction.message.edit(
                     embed=embed)
             else:
@@ -43,7 +45,7 @@ class TwentyFortyEightButton(Button):
                     img.save(output, format="PNG")
                     output.seek(0)
                     await interaction.message.edit(content=f"Score: {self.game.score}", file=discord.File(output, filename="2048.png"), attachments=[])  # Send the final product into discord
-
+                    # Note: Attachments need to be empty for it to work (it deletes the other attachments and replaces them)
         else:
             await interaction.response.send_message("This is not your game!", ephemeral=True)
 
@@ -81,7 +83,7 @@ class twenty_forty_eight_command(commands.Cog):
     async def twenty_forty_eight_command(self, ctx,
                                          empty_character: discord.Option(str, default="*", min_length=1, max_length=1,
                                                                          description="The empty characters of the board"),
-                                         text_based: discord.Option(bool, default=False),
+                                         text_based: discord.Option(bool, default=False, description="This is a faster version (faster loading not playing) of the game that doesn't use images."),
                                          size: discord.Option(int, default=4, min_value=2, max_value=10,
                                                               description="Horizontal size of the board")):
         game = await twenty_forty_eight_handler.create_2048(empty_char=empty_character, board_size_x=size,

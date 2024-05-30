@@ -10,10 +10,17 @@ import asyncio
 async def main():
     game = await twenty_forty_eight_handler.create_2048()
     running = True
+    index = 0
+    consts = ('r', 'l', 'u', 'd')
     while running:
         print(await game.decrypt_board())
         print(f"Score: {game.score}")
-        i = input()
+        if await game.check_dead():
+            return print("Yay died!")
+        index += 1
+        i = consts[index]
+        if index >= 3:
+            index = 0
 
         if i == 'stop':
             break
