@@ -12,7 +12,6 @@ import os
 async def convert_board_to_image(board_list, size=200, empty_char="*", color_background: (int, int, int) = (0, 0, 0),
                                  color_font: (int, int, int) = (255, 255, 255)):
     font_path = os.path.abspath(r"cogs\games\fonts\Pixelify_Sans\static\PixelifySans-Regular.ttf")
-    print(font_path)
     img = Image.new(mode="RGB", size=(size, size), color=color_background)
     draw = ImageDraw.Draw(img)
     draw.fontmode = '1'

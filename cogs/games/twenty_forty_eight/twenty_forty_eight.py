@@ -34,17 +34,33 @@ class TwentyFortyEightButton(Button):
                     colour=discord.Colour.random()
                 )
                 embed.set_author(name=self.user, icon_url=self.user.avatar.url)
-                embed.set_footer(text=f"Score: {self.game.score}")
-                if self.game.check_dead():
+
+                if await self.game.check_dead():
+                    embed.set_footer(text=f"**You died!**\nFinal Score: {self.game.score}")
+                    embed.colour = discord.Color.from_rgb(0, 0, 0)
                     return await interaction.message.edit(embed=embed)
+                embed.set_footer(text=f"Score: {self.game.score}")
                 await interaction.message.edit(
                     embed=embed)
             else:
+                if await self.game.check_dead():
+                    self.view.disable_all_items()
+                    with io.BytesIO() as output:
+                        img = await twenty_forty_eight_pillow.convert_board_to_image(self.game.board_list)
+                        img.save(output, format="PNG")
+                        output.seek(0)
+                        return await interaction.message.edit(
+                            content=f"Player: {interaction.user}\nFinal Score: {self.game.score}",
+                            file=discord.File(output, filename="2048.png"),
+                            attachments=[], view=self.view)  # Send the final product into discord
+                        # Note: Attachments need to be empty for it to work (it deletes the other attachments and replaces them)
                 with io.BytesIO() as output:
                     img = await twenty_forty_eight_pillow.convert_board_to_image(self.game.board_list)
                     img.save(output, format="PNG")
                     output.seek(0)
-                    await interaction.message.edit(content=f"Score: {self.game.score}", file=discord.File(output, filename="2048.png"), attachments=[])  # Send the final product into discord
+                    await interaction.message.edit(content=f"Player: {interaction.user}\nScore: {self.game.score}",
+                                                   file=discord.File(output, filename="2048.png"),
+                                                   attachments=[])  # Send the final product into discord
                     # Note: Attachments need to be empty for it to work (it deletes the other attachments and replaces them)
         else:
             await interaction.response.send_message("This is not your game!", ephemeral=True)
@@ -68,7 +84,10 @@ class twenty_forty_eight_view(View):
             new_embed.description = new_embed.description + "\n **Timed out!**"
             await self.message.edit(embed=new_embed, view=self)
         else:
-            await self.message.edit(f"{self.message.content} \n **Timed out**", view=self)
+            try:
+                await self.message.edit(f"{self.message.content} \n **Timed out**", view=self)
+            except discord.errors.NotFound:
+                pass  # ignore, user deleted their game
 
 
 class twenty_forty_eight_command(commands.Cog):
@@ -83,7 +102,8 @@ class twenty_forty_eight_command(commands.Cog):
     async def twenty_forty_eight_command(self, ctx,
                                          empty_character: discord.Option(str, default="*", min_length=1, max_length=1,
                                                                          description="The empty characters of the board"),
-                                         text_based: discord.Option(bool, default=False, description="This is a faster version (faster loading not playing) of the game that doesn't use images."),
+                                         text_based: discord.Option(bool, default=False,
+                                                                    description="This is a faster version (faster loading not playing) of the game that doesn't use images."),
                                          size: discord.Option(int, default=4, min_value=2, max_value=10,
                                                               description="Horizontal size of the board")):
         game = await twenty_forty_eight_handler.create_2048(empty_char=empty_character, board_size_x=size,
@@ -93,8 +113,9 @@ class twenty_forty_eight_command(commands.Cog):
                 img = await twenty_forty_eight_pillow.convert_board_to_image(game.board_list)
                 img.save(output, format="PNG")
                 output.seek(0)
-                message = await ctx.respond(
-                    file=discord.File(output, filename="2048.png"))  # Send the final product into discord
+                message = await ctx.respond(f"Player: {ctx.author}\nScore: 0",
+                                            file=discord.File(output,
+                                                              filename="2048.png"))  # Send the final product into discord
         else:
             embed = discord.Embed(
                 title="2048",
