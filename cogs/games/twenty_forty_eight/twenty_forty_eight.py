@@ -9,11 +9,12 @@ import io
 
 
 class TwentyFortyEightButton(Button):
-    def __init__(self, row, emoji, game, user, color):
+    def __init__(self, row, emoji, game, user, color, text_based):
         super().__init__(style=discord.ButtonStyle.blurple, emoji=emoji, row=row)
         self.game = game
         self.user = user
         self.color = color
+        self.text_based = text_based
 
     async def callback(self, interaction):
         if self.user == interaction.user:
@@ -26,35 +27,46 @@ class TwentyFortyEightButton(Button):
                 await self.game.up()
             elif self.emoji.name == "🔽":
                 await self.game.down()
-            embed = discord.Embed(
-                title="2048",
-                description=f"```\n{await self.game.decrypt_board()}```",
-                colour=discord.Colour.random()
-            )
-            embed.set_author(name=self.user, icon_url=self.user.avatar.url)
-            embed.set_footer(text=f"Score: {self.game.score}")
-            await interaction.message.edit(
-                embed=embed)
+            if self.text_based:
+                embed = discord.Embed(
+                    title="2048",
+                    description=f"```\n{await self.game.decrypt_board()}```",
+                    colour=discord.Colour.random()
+                )
+                embed.set_author(name=self.user, icon_url=self.user.avatar.url)
+                embed.set_footer(text=f"Score: {self.game.score}")
+                await interaction.message.edit(
+                    embed=embed)
+            else:
+                with io.BytesIO() as output:
+                    img = await twenty_forty_eight_pillow.convert_board_to_image(self.game.board_list)
+                    img.save(output, format="PNG")
+                    output.seek(0)
+                    await interaction.message.edit(content=f"Score: {self.game.score}", file=discord.File(output, filename="2048.png"), attachments=[])  # Send the final product into discord
 
         else:
             await interaction.response.send_message("This is not your game!", ephemeral=True)
 
 
 class twenty_forty_eight_view(View):
-    def __init__(self, user, game, m):
+    def __init__(self, user, game, m, text_based: bool):
         super().__init__(timeout=500)
         self.message = m
-        self.add_item(TwentyFortyEightButton(0, "🔼", game, user, False))
-        self.add_item(TwentyFortyEightButton(0, "🔽", game, user, False))
-        self.add_item(TwentyFortyEightButton(0, "◀", game, user, False))
-        self.add_item(TwentyFortyEightButton(0, "▶", game, user, False))
+        self.text_based = text_based
+        self.add_item(TwentyFortyEightButton(0, "🔼", game, user, False, text_based))
+        self.add_item(TwentyFortyEightButton(0, "🔽", game, user, False, text_based))
+        self.add_item(TwentyFortyEightButton(0, "◀", game, user, False, text_based))
+        self.add_item(TwentyFortyEightButton(0, "▶", game, user, False, text_based))
 
     async def on_timeout(self):
         self.disable_all_items()
-        new_embed = self.message.embeds[0]
-        new_embed.color = discord.Color.darker_grey()
-        new_embed.description = new_embed.description + "\n **Timed out!**"
-        await self.message.edit(embed=new_embed, view=self)
+        if self.text_based:
+            new_embed = self.message.embeds[0]
+            new_embed.color = discord.Color.darker_grey()
+            new_embed.description = new_embed.description + "\n **Timed out!**"
+            await self.message.edit(embed=new_embed, view=self)
+        else:
+            await self.message.edit(f"{self.message.content} \n **Timed out**", view=self)
 
 
 class twenty_forty_eight_command(commands.Cog):
@@ -91,7 +103,7 @@ class twenty_forty_eight_command(commands.Cog):
             embed.set_footer(text=f"Score: {game.score}")
 
             message = await ctx.respond(embed=embed)
-        view = twenty_forty_eight_view(ctx.user, game, message)
+        view = twenty_forty_eight_view(ctx.user, game, message, text_based)
 
         await message.edit_original_response(view=view)
 
