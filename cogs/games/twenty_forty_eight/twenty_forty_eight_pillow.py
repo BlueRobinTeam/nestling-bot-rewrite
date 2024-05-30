@@ -6,11 +6,16 @@ the board list.
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
+import os
 
 
-def convert_board_to_image(board_list, size, empty_char, color_background: (int, int, int),
-                           color_font: (int, int, int)):
-    font_path = "./fonts/Pixelify_Sans/static/PixelifySans-Regular.ttf"
+async def convert_board_to_image(board_list, size=200, empty_char="*", color_background: (int, int, int) = (0, 0, 0),
+                                 color_font: (int, int, int) = (255, 255, 255)):
+    # font_path = os.path.abspath("./../fonts/Pixelify_Sans/static/PixelifySans-Regular.ttf")
+    # print(font_path)
+    # font_path = "C:\Users\julia\PycharmProjects\nestlingRewrite\cogs\games\fonts\Pixelify_Sans\static\PixelifySans-Regular.ttf"
+    font_path = os.path.abspath(r"cogs\games\fonts\Pixelify_Sans\static\PixelifySans-Regular.ttf")
+    print(font_path)
     img = Image.new(mode="RGB", size=(size, size), color=color_background)
     draw = ImageDraw.Draw(img)
     draw.fontmode = '1'
@@ -30,6 +35,7 @@ def convert_board_to_image(board_list, size, empty_char, color_background: (int,
 
                 else:
                     font = ImageFont.truetype(font_path, font_size)
+
                     offset = font_size / 4
                 #  https://stackoverflow.com/questions/16373425/add-text-on-image-using-pil
                 draw.text((x * tile_x_size + (size / board_length ** 2),
