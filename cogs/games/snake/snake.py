@@ -10,17 +10,27 @@ class SnakeView(discord.ui.View):
         self.snake_class = c
         self.user = user
         buttons = ["🔼", "🔽", "◀", "▶"]
+        for button in buttons:
+            self.add_item(self.basicButton(button))
 
     class basicButton(Button):
         def __init__(self, emoji):
             super().__init__(emoji=emoji, style=discord.ButtonStyle.blurple)
+            self.emoji = emoji
 
-        def callback(self, interaction):
+        async def callback(self, interaction):
             if interaction.user == self.view.user:
                 await interaction.response.defer()
 
                 embed = self.view.message.embeds[0]
-                move = self.view.snake_class.move_up()
+                if self.emoji.name == "🔼":
+                    move = self.view.snake_class.move_up()
+                elif self.emoji.name == "🔽":
+                    move = self.view.snake_class.move_down()
+                elif self.emoji.name == "◀":
+                    move = self.view.snake_class.move_left()
+                else:
+                    move = self.view.snake_class.move_right()
                 if move:
                     self.view.disable_all_items()
                     embed.title = 'You died!'
@@ -35,93 +45,93 @@ class SnakeView(discord.ui.View):
                 await interaction.message.edit(embed=self.view.message.embeds[0])
             else:
                 await interaction.response.send_message("This isn't your game!", ephemeral=True)
-
-    @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="🔼")
-    async def callback_up(self, _, interaction):
-        if interaction.user == self.user:
-            await interaction.response.defer()
-            embed = self.message.embeds[0]
-            move = self.snake_class.move_up()
-            if move:
-                self.disable_all_items()
-                embed.title = 'You died!'
-                embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
-                await interaction.message.edit(view=self, embed=embed)
-                return
-            if move is not None:
-                self.snake_class.tail_handle()
-
-            embed.description = self.snake_class.return_grid()
-            embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
-            await interaction.message.edit(embed=self.message.embeds[0])
-        else:
-            await interaction.response.send_message("This isn't your game!", ephemeral=True)
-
-    @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="🔽")
-    async def callback_down(self, _, interaction):
-        if interaction.user == self.user:
-            await interaction.response.defer()
-            embed = self.message.embeds[0]
-
-            move = self.snake_class.move_down()
-            if move:
-                self.disable_all_items()
-                embed.title = 'You died!'
-                embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
-                await interaction.message.edit(view=self, embed=embed)
-                return
-            if move is not None:
-                self.snake_class.tail_handle()
-
-            embed.description = self.snake_class.return_grid()
-            embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
-            await interaction.message.edit(embed=self.message.embeds[0])
-        else:
-            await interaction.response.send_message("This isn't your game!", ephemeral=True)
-
-    @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="◀")
-    async def callback_left(self, _, interaction):
-        if interaction.user == self.user:
-            await interaction.response.defer()
-            embed = self.message.embeds[0]
-
-            move = self.snake_class.move_left()
-            if move:
-                self.disable_all_items()
-                embed.title = 'You died!'
-                embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
-                await interaction.message.edit(view=self, embed=embed)
-                return
-            if move is not None:
-                self.snake_class.tail_handle()
-
-            embed.description = self.snake_class.return_grid()
-            embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
-            await interaction.message.edit(embed=self.message.embeds[0])
-        else:
-            await interaction.response.send_message("This isn't your game!", ephemeral=True)
-
-    @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="▶")
-    async def callback_right(self, _, interaction):
-        if interaction.user == self.user:
-            await interaction.response.defer()
-            embed = self.message.embeds[0]
-
-            move = self.snake_class.move_right()
-            if move:
-                self.disable_all_items()
-                embed.title = 'You died!'
-                embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
-                await interaction.message.edit(view=self, embed=embed)
-                return
-            if move is not None:
-                self.snake_class.tail_handle()
-
-            embed.description = self.snake_class.return_grid()
-            embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
-            await interaction.message.edit(embed=self.message.embeds[0])
-        else:
-            await interaction.response.send_message("This isn't your game!", ephemeral=True)
+    #
+    # @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="🔼")
+    # async def callback_up(self, _, interaction):
+    #     if interaction.user == self.user:
+    #         await interaction.response.defer()
+    #         embed = self.message.embeds[0]
+    #         move = self.snake_class.move_up()
+    #         if move:
+    #             self.disable_all_items()
+    #             embed.title = 'You died!'
+    #             embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
+    #             await interaction.message.edit(view=self, embed=embed)
+    #             return
+    #         if move is not None:
+    #             self.snake_class.tail_handle()
+    #
+    #         embed.description = self.snake_class.return_grid()
+    #         embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
+    #         await interaction.message.edit(embed=self.message.embeds[0])
+    #     else:
+    #         await interaction.response.send_message("This isn't your game!", ephemeral=True)
+    #
+    # @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="🔽")
+    # async def callback_down(self, _, interaction):
+    #     if interaction.user == self.user:
+    #         await interaction.response.defer()
+    #         embed = self.message.embeds[0]
+    #
+    #         move = self.snake_class.move_down()
+    #         if move:
+    #             self.disable_all_items()
+    #             embed.title = 'You died!'
+    #             embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
+    #             await interaction.message.edit(view=self, embed=embed)
+    #             return
+    #         if move is not None:
+    #             self.snake_class.tail_handle()
+    #
+    #         embed.description = self.snake_class.return_grid()
+    #         embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
+    #         await interaction.message.edit(embed=self.message.embeds[0])
+    #     else:
+    #         await interaction.response.send_message("This isn't your game!", ephemeral=True)
+    #
+    # @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="◀")
+    # async def callback_left(self, _, interaction):
+    #     if interaction.user == self.user:
+    #         await interaction.response.defer()
+    #         embed = self.message.embeds[0]
+    #
+    #         move = self.snake_class.move_left()
+    #         if move:
+    #             self.disable_all_items()
+    #             embed.title = 'You died!'
+    #             embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
+    #             await interaction.message.edit(view=self, embed=embed)
+    #             return
+    #         if move is not None:
+    #             self.snake_class.tail_handle()
+    #
+    #         embed.description = self.snake_class.return_grid()
+    #         embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
+    #         await interaction.message.edit(embed=self.message.embeds[0])
+    #     else:
+    #         await interaction.response.send_message("This isn't your game!", ephemeral=True)
+    #
+    # @discord.ui.button(style=discord.ButtonStyle.blurple, emoji="▶")
+    # async def callback_right(self, _, interaction):
+    #     if interaction.user == self.user:
+    #         await interaction.response.defer()
+    #         embed = self.message.embeds[0]
+    #
+    #         move = self.snake_class.move_right()
+    #         if move:
+    #             self.disable_all_items()
+    #             embed.title = 'You died!'
+    #             embed.description = embed.description + f'\n Final Score: {self.snake_class.apples * 10}'
+    #             await interaction.message.edit(view=self, embed=embed)
+    #             return
+    #         if move is not None:
+    #             self.snake_class.tail_handle()
+    #
+    #         embed.description = self.snake_class.return_grid()
+    #         embed.description = embed.description + f'\n Score: {self.snake_class.apples * 10}'
+    #         await interaction.message.edit(embed=self.message.embeds[0])
+    #     else:
+    #         await interaction.response.send_message("This isn't your game!", ephemeral=True)
 
 
 class SnakeGame(commands.Cog):

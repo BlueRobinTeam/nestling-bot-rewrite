@@ -19,16 +19,6 @@ class Snake:
         self.tail_positions = []
         self.last_move = None
 
-    def load_grid(self):
-        """
-        Function to load the grid in the console via print
-        """
-        for x in self.grid:
-            print_list = []
-            for y in x:
-                print_list.append(y)
-            print("".join(print_list))
-
     def return_grid(self) -> str:
         """
         Function to return the grid in a format that's readable
@@ -71,14 +61,12 @@ class Snake:
 
         if self.grid[y][x] == self.apple_char:
             self.apples += 1
-        print(current_move, self.last_move, 'e')
         if self.grid[y][x] == self.tail_char:
 
             if (current_move == 'up' and self.last_move == 'down') or (
                     current_move == 'down' and self.last_move == 'up') or (
                     current_move == 'left' and self.last_move == 'right') or (
                     current_move == 'right' and self.last_move == 'left'):
-                print(current_move, self.last_move, 'l')
                 return None  # Do nothing
             return True
 
