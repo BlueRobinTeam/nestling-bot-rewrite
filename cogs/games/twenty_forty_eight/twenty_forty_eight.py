@@ -1,3 +1,7 @@
+"""
+This is the main handler for the 2048 discord handler
+"""
+
 # --- Discord Imports ---
 import discord
 from discord.ext import commands  # for cogs

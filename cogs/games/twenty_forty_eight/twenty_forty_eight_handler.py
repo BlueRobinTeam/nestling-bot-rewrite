@@ -18,7 +18,7 @@ class TwentyFortyEight:
 
     async def create_board(self):
         """
-        Must be run after created initializing the TwentyFortyEight class.
+        Must be run after initializing the TwentyFortyEight class.
         Generates the board list asynchronously.
 
         create_2048 is a helper function that does this automatically

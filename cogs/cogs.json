@@ -2,7 +2,8 @@
   "sub_folders": {
     "games" : {
       "files": [
-        "twenty_forty_eight.twenty_forty_eight"
+        "twenty_forty_eight.twenty_forty_eight",
+        "snake.snake"
       ]
     }
   }
