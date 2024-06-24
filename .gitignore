@@ -3,3 +3,4 @@
 *.pclprof
 Fun/data
 venv
+*.db

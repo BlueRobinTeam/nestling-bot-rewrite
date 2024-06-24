@@ -105,7 +105,7 @@ class twenty_forty_eight_view(View):
             "Score submitted! \n *Note: You don't need to press this button to submit the score, "
             "timeouts also submit score automatically*", ephemeral=True)
 
-    async def submit_score(self):
+    async def submit_score(self):   # Submits score to the local sqlite database
         res = cur.execute("""SELECT * FROM scores WHERE userID IS ?""", (self.user.id,))  # Search for user in the database
         fetch = res.fetchone()
         if fetch:  # If user found
@@ -177,6 +177,8 @@ class twenty_forty_eight_command(commands.Cog):
             title="2048 Scoreboard",
             color=discord.Colour.random()
         )
+
+        ref = cur.execute("""SELECT * FROM scores ORDER BY """)
 
         await ctx.respond(embed=score_embed)
 
