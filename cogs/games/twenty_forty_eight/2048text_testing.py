@@ -19,11 +19,14 @@ async def main():
             return print("Yay died!")
         index += 1
         i = consts[index]
+
         if index >= 3:
             index = 0
 
         if i == 'stop':
             break
+
+        # i = input()
 
         if i == 'restart':
             game = await twenty_forty_eight_handler.create_2048()

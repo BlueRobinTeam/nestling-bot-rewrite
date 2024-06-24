@@ -27,10 +27,10 @@ class TwentyFortyEight:
 
         # --- Generate boardList ---
         rows = []
-        for _ in range(self.board_size_x):
+        for _ in range(self.board_size_x):  # Generate rows
             rows.append(self.empty_char)
         columns = []
-        for _ in range(self.board_size_y):
+        for _ in range(self.board_size_y):  # Generate columns
             columns.append(rows.copy())
 
         self.board_list = columns.copy()  # Save the generated board list
