@@ -14,7 +14,7 @@ import sqlite3
 
 con = sqlite3.connect("2048_scores.db")
 cur = con.cursor()
-cur.execute("""CREATE TABLE IF NOT EXISTS scores (userID INTEGER, score INTEGER)""")
+cur.execute("""CREATE TABLE IF NOT EXISTS scores (userID INTEGER, score INTEGER, USERNAME VARCHAR)""")
 
 
 class TwentyFortyEightButton(Button):
@@ -105,15 +105,18 @@ class twenty_forty_eight_view(View):
             "Score submitted! \n *Note: You don't need to press this button to submit the score, "
             "timeouts also submit score automatically*", ephemeral=True)
 
-    async def submit_score(self):   # Submits score to the local sqlite database
-        res = cur.execute("""SELECT * FROM scores WHERE userID IS ?""", (self.user.id,))  # Search for user in the database
+    async def submit_score(self):  # Submits score to the local sqlite database
+        res = cur.execute("""SELECT * FROM scores WHERE userID IS ?""",
+                          (self.user.id,))  # Search for user in the database
         fetch = res.fetchone()
         if fetch:  # If user found
             score = fetch[1]  # User's score
             if self.game.score > score:  # If the score is greater than the current user's score
                 cur.execute("""UPDATE scores SET score = ? WHERE userID IS ?""", (self.game.score, self.user.id))
+            if fetch[2] != self.user.name:
+                cur.execute("""UPDATE scores SET USERNAME = ? WHERE userID IS ?""", (self.user.name, self.user.id))  # Global name changes
         else:  # If not found, create a new score for that user
-            cur.execute("""INSERT INTO scores VALUES(?, ?)""", (self.user.id, self.game.score))
+            cur.execute("""INSERT INTO scores VALUES(?, ?, ?)""", (self.user.id, self.game.score, self.user.name))
         con.commit()
 
     async def on_timeout(self):
@@ -172,13 +175,16 @@ class twenty_forty_eight_command(commands.Cog):
         await message.edit_original_response(view=view)
 
     @commands.slash_command(name="2048scoreboard")
-    async def scoreboard(self, ctx):
+    async def scoreboard(self, ctx,
+                         limit: discord.Option(int, "Limit the number of results", min_value=1, max_value=10)):
         score_embed = discord.Embed(
             title="2048 Scoreboard",
             color=discord.Colour.random()
         )
 
-        ref = cur.execute("""SELECT * FROM scores ORDER BY """)
+        ref = cur.execute("""SELECT * FROM scores ORDER BY score DES LIMIT ?""", (limit,))
+        people = ref.fetchall()
+        score_embed.add_field()
 
         await ctx.respond(embed=score_embed)
 
