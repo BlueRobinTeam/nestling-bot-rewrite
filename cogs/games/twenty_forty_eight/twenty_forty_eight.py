@@ -182,9 +182,12 @@ class twenty_forty_eight_command(commands.Cog):
             color=discord.Colour.random()
         )
 
-        ref = cur.execute("""SELECT * FROM scores ORDER BY score DES LIMIT ?""", (limit,))
+        ref = cur.execute("""SELECT * FROM scores ORDER BY score DESC LIMIT ?""", (limit,))
         people = ref.fetchall()
-        score_embed.add_field()
+        end_string = ""
+        for person in people:
+            end_string += f"{person[2]} : {person[1]} \n"
+        score_embed.add_field(name='SCORES', value=end_string)
 
         await ctx.respond(embed=score_embed)
 
