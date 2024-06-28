@@ -69,14 +69,16 @@ async def discord_login():
                       (jwt_encoded_id,))  # Search for user in the database
     fetch = res.fetchone()
 
-    if fetch:  # If not found, create a new score for that user
-        if req_user_json['email'] != fetch[2]:  # If the score is greater than the current user's score
+    if fetch:
+        if req_user_json['avatar'] != fetch[3]:
+            cur.execute("""UPDATE users SET AVATAR = ? WHERE userID IS ?""", (req_user_json['AVATAR'], jwt_encoded_id))
+        if req_user_json['email'] != fetch[2]:
             cur.execute("""UPDATE users SET email = ? WHERE userID IS ?""", (req_user_json['email'], jwt_encoded_id))
         if req_user_json['username'] != fetch[1]:
             cur.execute("""UPDATE users SET USERNAME = ? WHERE userID IS ?""",
-                        (req_user_json['username'], jwt_encoded_id))  # Global name changes
+                        (req_user_json['username'], jwt_encoded_id))
     else:
-        cur.execute("""INSERT INTO users VALUES(?, ?, ?)""", (jwt_encoded_id, req_user_json['username'], req_user_json['email']))
+        cur.execute("""INSERT INTO users VALUES(?, ?, ?, ?)""", (jwt_encoded_id, req_user_json['username'], req_user_json['email'], req_user_json['avatar']))
 
     con.commit()
     cur.close()
