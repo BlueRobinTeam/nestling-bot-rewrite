@@ -9,7 +9,6 @@ app = Flask(__name__)
 bot_secret = os.getenv("OAUTH_TOKEN")  # From the OAUTH page and NOT the bot page (spent way too long on this)
 bot_id = os.getenv("BOT_ID")
 
-print(bot_secret, bot_id)
 
 @app.route('/')
 async def hello_world():
