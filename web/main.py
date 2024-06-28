@@ -54,8 +54,6 @@ async def discord_login():
         return redirect(AUTH_URL)
     req_user_json = req_user.json()
 
-    print(req_user_json)
-
     jwt_encoded_id = jwt.encode(
         {'id': req_user_json['id'], }, key=jwt_token_signature, algorithm='HS256')
 
@@ -78,7 +76,8 @@ async def discord_login():
             cur.execute("""UPDATE users SET USERNAME = ? WHERE userID IS ?""",
                         (req_user_json['username'], jwt_encoded_id))
     else:
-        cur.execute("""INSERT INTO users VALUES(?, ?, ?, ?)""", (jwt_encoded_id, req_user_json['username'], req_user_json['email'], req_user_json['avatar']))
+        cur.execute("""INSERT INTO users VALUES(?, ?, ?, ?)""",
+                    (jwt_encoded_id, req_user_json['username'], req_user_json['email'], req_user_json['avatar']))
 
     con.commit()
     cur.close()
@@ -89,7 +88,21 @@ async def discord_login():
 
 @app.route('/panel')
 async def panel():
-    pass
+    con = sqlite3.connect("users.db")
+    cur = con.cursor()
+    token = request.cookies.get('token')  # JWT token
+    if not token:
+        return redirect('/auth/discord')
+
+    userID = jwt.decode(token, key=jwt_token_signature, algorithms="HS256")
+    res = cur.execute("""SELECT * FROM users WHERE userID IS ?""",
+                      (token,))  # Search for user in the database
+    fetch = res.fetchone()
+
+    cur.close()
+    con.close()
+
+    return flask.render_template('panel.html', username=fetch[1])
 
 
 if __name__ == '__main__':
