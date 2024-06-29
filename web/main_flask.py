@@ -4,13 +4,24 @@ from flask import request, make_response, redirect
 import requests
 import os
 import jwt
+import discord
+import threading
 
 import sqlite3
 
 # --- Initialize the database ---
 db_con = sqlite3.connect("users.db")
 db_cur = db_con.cursor()
-db_cur.execute("""CREATE TABLE IF NOT EXISTS users (userID VARCHAR, USERNAME VARCHAR, EMAIL VARCHAR, AVATAR VARCHAR)""")
+db_cur.execute(
+    """CREATE TABLE IF NOT EXISTS users (userID VARCHAR, USERNAME VARCHAR, EMAIL VARCHAR, AVATAR VARCHAR, last_token VARCHAR, refresh_token VARCHAR)""")
+"""
+0 userID: The user's ID that is stored in a JWT token
+1 USERNAME: The user's discord username
+2 EMAIL: The user's email connected to their discord account
+3 AVATAR: The user's avatar connected to their discord account
+4 last_token: The last token received by the website from discord's authentication
+5 refresh_token: The token used to refresh the authentication
+"""
 db_cur.close()
 db_con.commit()
 db_con.close()
@@ -23,6 +34,22 @@ bot_id = os.getenv("BOT_ID")
 jwt_token_signature = os.getenv('JWT_TOKEN_SIGNATURE')
 
 AUTH_URL = "https://discord.com/oauth2/authorize?client_id=1175578439202390086&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000%2Fauth%2Fdiscord&scope=guilds+identify+email"
+
+bot = discord.Bot
+
+
+async def start_app(bot_):
+    global bot
+    bot = bot_
+
+    app_thread = threading.Thread(target=app.run)
+    app_thread.start()
+
+
+async def get_data(endpoint, access_token):
+    req_user = requests.get(f'https://discord.com/api/v10/{endpoint}',
+                            headers={'Authorization': f'Bearer {access_token}'})
+    return req_user
 
 
 @app.route('/')
@@ -48,8 +75,7 @@ async def discord_login():
     req = requests.post('https://discord.com/api/v10/oauth2/token', data=data,
                         headers=headers, auth=(bot_id, bot_secret))
     try:
-        req_user = requests.get('https://discord.com/api/v10/users/@me',
-                                headers={'Authorization': f'Bearer {req.json()["access_token"]}'})
+        req_user = await get_data('users/@me', req.json()["access_token"])
     except KeyError:
         return redirect(AUTH_URL)
     req_user_json = req_user.json()
@@ -66,7 +92,6 @@ async def discord_login():
     res = cur.execute("""SELECT * FROM users WHERE userID IS ?""",
                       (jwt_encoded_id,))  # Search for user in the database
     fetch = res.fetchone()
-
     if fetch:
         if req_user_json['avatar'] != fetch[3]:
             cur.execute("""UPDATE users SET AVATAR = ? WHERE userID IS ?""", (req_user_json['AVATAR'], jwt_encoded_id))
@@ -75,9 +100,14 @@ async def discord_login():
         if req_user_json['username'] != fetch[1]:
             cur.execute("""UPDATE users SET USERNAME = ? WHERE userID IS ?""",
                         (req_user_json['username'], jwt_encoded_id))
+        cur.execute("""UPDATE users SET last_token = ? WHERE userID IS ?""",
+                    (req.json()['access_token'], jwt_encoded_id))
+        cur.execute("""UPDATE users SET refresh_token = ? WHERE userID IS ?""",
+                    (req.json()['refresh_token'], jwt_encoded_id))
     else:
-        cur.execute("""INSERT INTO users VALUES(?, ?, ?, ?)""",
-                    (jwt_encoded_id, req_user_json['username'], req_user_json['email'], req_user_json['avatar']))
+        cur.execute("""INSERT INTO users VALUES(?, ?, ?, ?, ?, ?)""",
+                    (jwt_encoded_id, req_user_json['username'], req_user_json['email'], req_user_json['avatar'],
+                     req.json()['access_token'], req.json()['refresh_token']))
 
     con.commit()
     cur.close()
@@ -94,15 +124,41 @@ async def panel():
     if not token:
         return redirect('/auth/discord')
 
-    userID = jwt.decode(token, key=jwt_token_signature, algorithms="HS256")
+    userID = jwt.decode(str(token), key=jwt_token_signature, algorithms="HS256")['id']
     res = cur.execute("""SELECT * FROM users WHERE userID IS ?""",
                       (token,))  # Search for user in the database
     fetch = res.fetchone()
 
+    req_user_guilds = await get_data('users/@me/guilds', fetch[4])
+
+    user_guilds = req_user_guilds.json()
+    print(bot.guilds)
+    for guild in user_guilds:
+        # noinspection PyTypeChecker
+        for bot_guild in bot.guilds:
+            if int(guild['id']) == int(bot_guild.id):
+                print(guild)
+
     cur.close()
     con.close()
+    return flask.render_template('panel.html', username=fetch[1],
+                                 avatar=f"https://cdn.discordapp.com/avatars/{userID}/{fetch[3]}.png")
 
-    return flask.render_template('panel.html', username=fetch[1])
+
+async def refresh_token(token: str):
+    data = {
+        'grant_type': 'refresh_token',
+        'refresh_token': token
+    }
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+
+    req = requests.post(f'https://discord.com/api/v10//oauth2/token', data=data, headers=headers,
+                        auth=(bot_id, bot_secret))
+
+    return req.json()
 
 
 if __name__ == '__main__':
