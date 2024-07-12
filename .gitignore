@@ -4,3 +4,4 @@
 Fun/data
 venv
 *.db
+**/node_modules/
