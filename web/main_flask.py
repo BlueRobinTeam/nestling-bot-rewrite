@@ -13,7 +13,8 @@ import sqlite3
 db_con = sqlite3.connect("users.db")
 db_cur = db_con.cursor()
 db_cur.execute(
-    """CREATE TABLE IF NOT EXISTS users (userID VARCHAR, USERNAME VARCHAR, EMAIL VARCHAR, AVATAR VARCHAR, last_token VARCHAR, refresh_token VARCHAR)""")
+    """CREATE TABLE IF NOT EXISTS users (userID VARCHAR, USERNAME VARCHAR, EMAIL VARCHAR, AVATAR VARCHAR, last_token 
+    VARCHAR, refresh_token VARCHAR)""")
 """
 0 userID: The user's ID that is stored in a JWT token
 1 USERNAME: The user's discord username
@@ -33,7 +34,7 @@ bot_id = os.getenv("BOT_ID")
 
 jwt_token_signature = os.getenv('JWT_TOKEN_SIGNATURE')
 
-AUTH_URL = "https://discord.com/oauth2/authorize?client_id=1175578439202390086&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000%2Fauth%2Fdiscord&scope=guilds+identify+email"
+AUTH_URL = os.getenv("URL_AUTH")
 
 bot = discord.Bot
 
@@ -124,7 +125,7 @@ async def panel():
     if not token:
         return redirect('/auth/discord')
 
-    userID = jwt.decode(str(token), key=jwt_token_signature, algorithms="HS256")['id']
+    user_id = jwt.decode(str(token), key=jwt_token_signature, algorithms="HS256")['id']
     res = cur.execute("""SELECT * FROM users WHERE userID IS ?""",
                       (token,))  # Search for user in the database
     fetch = res.fetchone()
@@ -132,17 +133,20 @@ async def panel():
     req_user_guilds = await get_data('users/@me/guilds', fetch[4])
 
     user_guilds = req_user_guilds.json()
-    print(bot.guilds)
+    shared_guilds = []
     for guild in user_guilds:
         # noinspection PyTypeChecker
         for bot_guild in bot.guilds:
-            if int(guild['id']) == int(bot_guild.id):
-                print(guild)
-
+            # if guild == 'message' or guild == 'code':  # If the bot is installed within user-installed apps
+            #     continue
+            if int(guild['id']) == int(bot_guild.id):  # Shared guild
+                shared_guilds.append(guild)
+    print(shared_guilds)
     cur.close()
     con.close()
     return flask.render_template('panel.html', username=fetch[1],
-                                 avatar=f"https://cdn.discordapp.com/avatars/{userID}/{fetch[3]}.png")
+                                 avatar=f"https://cdn.discordapp.com/avatars/{user_id}/{fetch[3]}.png",
+                                 shared_guilds=shared_guilds)
 
 
 async def refresh_token(token: str):

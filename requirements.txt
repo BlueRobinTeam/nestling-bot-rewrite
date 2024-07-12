@@ -12,3 +12,5 @@ pillow
 chardet
 cloudinary
 matplotlib
+flask
+PyJWT

@@ -9,4 +9,7 @@
 <body>
 <h1>Welcome {{username}}!</h1>
 <img src={{avatar}} alt="Your avatar">
+{% for guild in shared_guilds %}
+    <p>{{guild['name']}}</p>
+{% endfor %}
 </body>
