@@ -131,13 +131,16 @@ async def panel():
 
     req_user_guilds = await get_data('users/@me/guilds', fetch[4])
 
-    user_guilds = req_user_guilds.json()
-    print(bot.guilds)
-    for guild in user_guilds:
+    json_user_guilds = req_user_guilds.json()
+    user_guilds = []
+    for guild in json_user_guilds:
         # noinspection PyTypeChecker
         for bot_guild in bot.guilds:
-            if int(guild['id']) == int(bot_guild.id):
-                print(guild)
+            if int(guild['id']) == int(bot_guild.id):  # Check if user is in any of the bot's guilds
+                user_permissions = discord.Permissions(int(guild['permissions']))  # Thanks icewolfy! :)
+                if user_permissions.manage_guild:
+                    user_guilds.append(guild)
+                
 
     cur.close()
     con.close()

@@ -1,6 +1,8 @@
 import discord
 import os
 import json
+from web import main_flask
+import threading
 
 # --- Discord Intents ---
 intents = discord.Intents.default()
@@ -34,6 +36,8 @@ async def on_connect():
 
     await bot.sync_commands()
     print("Synced commands!")
+
+    await main_flask.start_app(bot)
 
 
 @bot.event
