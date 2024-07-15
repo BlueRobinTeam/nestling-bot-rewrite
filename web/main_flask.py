@@ -13,7 +13,8 @@ import sqlite3
 db_con = sqlite3.connect("users.db")
 db_cur = db_con.cursor()
 db_cur.execute(
-    """CREATE TABLE IF NOT EXISTS users (userID VARCHAR, USERNAME VARCHAR, EMAIL VARCHAR, AVATAR VARCHAR, last_token VARCHAR, refresh_token VARCHAR)""")
+    """CREATE TABLE IF NOT EXISTS users (userID VARCHAR, USERNAME VARCHAR, EMAIL VARCHAR, AVATAR VARCHAR, last_token 
+    VARCHAR, refresh_token VARCHAR)""")
 """
 0 userID: The user's ID that is stored in a JWT token
 1 USERNAME: The user's discord username
@@ -26,14 +27,15 @@ db_cur.close()
 db_con.commit()
 db_con.close()
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
+print(app.static_url_path, app.static_folder)
 
 bot_secret = os.getenv("OAUTH_TOKEN")  # From the OAUTH page and NOT the bot page (spent way too long on this)
 bot_id = os.getenv("BOT_ID")
 
 jwt_token_signature = os.getenv('JWT_TOKEN_SIGNATURE')
 
-AUTH_URL = "https://discord.com/oauth2/authorize?client_id=1175578439202390086&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000%2Fauth%2Fdiscord&scope=guilds+identify+email"
+AUTH_URL = os.getenv("URL_AUTH")
 
 bot = discord.Bot
 
@@ -124,7 +126,7 @@ async def panel():
     if not token:
         return redirect('/auth/discord')
 
-    userID = jwt.decode(str(token), key=jwt_token_signature, algorithms="HS256")['id']
+    user_id = jwt.decode(str(token), key=jwt_token_signature, algorithms="HS256")['id']
     res = cur.execute("""SELECT * FROM users WHERE userID IS ?""",
                       (token,))  # Search for user in the database
     fetch = res.fetchone()
@@ -140,12 +142,12 @@ async def panel():
                 user_permissions = discord.Permissions(int(guild['permissions']))  # Thanks icewolfy! :)
                 if user_permissions.manage_guild:
                     user_guilds.append(guild)
-                
 
     cur.close()
     con.close()
     return flask.render_template('panel.html', username=fetch[1],
-                                 avatar=f"https://cdn.discordapp.com/avatars/{userID}/{fetch[3]}.png")
+                                 avatar=f"https://cdn.discordapp.com/avatars/{user_id}/{fetch[3]}.png",
+                                 shared_guilds=user_guilds)
 
 
 async def refresh_token(token: str):
