@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playwrite+CU:wght@100..400&display=swap" rel="stylesheet">
+    <title>Nestling Bot</title>
+</head>
+<body class="flex m-0 p-0 min-h-screen text-white">
+<div id="bg-gradient" class="m-0 p-0 flex flex-col flex-grow bg-gradient-to-tr from-black via-cyan-750 to-blue-800">
+    <div id="navbar" class="flex m-5 p-5">
+        <ul class="flex grow flex-row space-x-5 align-center">
+            <li><a href="/">Home</a></li>
+            <li><a href="about">About</a></li>
+            <li><a href="commands">Commands</a></li>
+            <li class="flex grow justify-items-end justify-end"><a href="login">Login</a></li>
+        </ul>
+    </div>
+    <div id="content">{% block content %}{% endblock %}</div>
+</div>
+</body>
+</html>

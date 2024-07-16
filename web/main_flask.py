@@ -28,7 +28,6 @@ db_con.commit()
 db_con.close()
 
 app = Flask(__name__, static_url_path='')
-print(app.static_url_path, app.static_folder)
 
 bot_secret = os.getenv("OAUTH_TOKEN")  # From the OAUTH page and NOT the bot page (spent way too long on this)
 bot_id = os.getenv("BOT_ID")
@@ -140,7 +139,6 @@ async def panel():
         for bot_guild in bot.guilds:
             if int(guild['id']) == int(bot_guild.id):  # Shared guild
                 shared_guilds.append(guild)
-    print(shared_guilds)
     cur.close()
     con.close()
     return flask.render_template('panel.html', username=fetch[1],
@@ -165,4 +163,4 @@ async def refresh_token(token: str):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
