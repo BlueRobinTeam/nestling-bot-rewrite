@@ -1,5 +1,5 @@
 py-cord
-requests
+requests~=2.31.0
 pymongo
 feedparser
 beautifulsoup4
@@ -8,9 +8,10 @@ plotly
 kaleido==0.0.1
 pandas
 cryptography
-pillow
+pillow~=10.3.0
 chardet
 cloudinary
 matplotlib
-flask
+Flask~=3.0.3
+flask[async]
 PyJWT

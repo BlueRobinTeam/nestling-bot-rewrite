@@ -132,18 +132,21 @@ async def panel():
 
     req_user_guilds = await get_data('users/@me/guilds', fetch[4])
 
-    user_guilds = req_user_guilds.json()
-    shared_guilds = []
-    for guild in user_guilds:
+    json_user_guilds = req_user_guilds.json()
+    user_guilds = []
+    for guild in json_user_guilds:
         # noinspection PyTypeChecker
         for bot_guild in bot.guilds:
-            if int(guild['id']) == int(bot_guild.id):  # Shared guild
-                shared_guilds.append(guild)
+            if int(guild['id']) == int(bot_guild.id):  # Check if user is in any of the bot's guilds
+                user_permissions = discord.Permissions(int(guild['permissions']))  # Thanks icewolfy! :)
+                if user_permissions.manage_guild:
+                    user_guilds.append(guild)
+
     cur.close()
     con.close()
     return flask.render_template('panel.html', username=fetch[1],
                                  avatar=f"https://cdn.discordapp.com/avatars/{user_id}/{fetch[3]}.png",
-                                 shared_guilds=shared_guilds)
+                                 shared_guilds=user_guilds)
 
 
 async def refresh_token(token: str):
