@@ -3,7 +3,7 @@ module.exports = {
   content: ['./templates/*'],
   theme: {
     extend: {},
-    fontFamily: {"title": ["'Playwrite CU'", 'cursive']},
+    fontFamily: {"sans": ["'Ubuntu'"]},
   },
   plugins: [],
 }

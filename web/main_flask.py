@@ -54,9 +54,14 @@ async def get_data(endpoint, access_token):
 
 
 @app.route('/')
-async def hello_world():
+async def index():
     return flask.render_template('index.html',
                                  auth_url=AUTH_URL)
+
+
+@app.route('/about')
+async def about():
+    return flask.render_template('about.html',)
 
 
 @app.route('/auth/discord')
@@ -78,6 +83,7 @@ async def discord_login():
     try:
         req_user = await get_data('users/@me', req.json()["access_token"])
     except KeyError:
+        print(req.json())
         return redirect(AUTH_URL)
     req_user_json = req_user.json()
 
