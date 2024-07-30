@@ -2,8 +2,36 @@
 {% block content %}
 <div class="flex flex-col justify-center">
 
-    <h1 class="font-bold font-title justify-center self-center align-center text-7xl m-5">Welcome to Nestling Bot!</h1>
-    <a class="justify-center align-center self-center text-2xl m-2 p-2 underline" href={{auth_url}}>Now with a new Bot Panel!</a>
-    <a class="rounded-lg bg-gradient-to-bl from-gray-950 via-gray-900 to-black border-b-4 border-blue-500 self-center justify-center align-center m-20 text-xl p-2" href="https://discord.com/api/oauth2/authorize?client_id=1044320506943377439&permissions=3843929668855&scope=bot" >Add to your server</a>
+    <div class="font-medium justify-center self-center align-center m-5 p-5 flex flex-col scale-up-top">
+        <h1 class="justify-center self-center align-center text-5xl m-5">Nestling Bot will handle
+            your Discord server for you, </h1>
+        <h1 class="font-bold self-center align-center text-5xl justify-center">
+            for free
+        </h1>
+            <a class="fade-in rounded-lg bg-gradient-to-bl from-gray-950 via-gray-900 to-black border-b-4 border-blue-500 self-center justify-center align-center m-20 text-xl p-2 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-150"
+       href="https://discord.com/api/oauth2/authorize?client_id=1044320506943377439&permissions=3843929668855&scope=bot">Add
+        to Discord</a>
+    </div>
+
+    <div class="fade-in justify-center flex flex-col self-center">
+        <h2 class="justify-center align-center text-3xl m-3 p-2 self-center font-medium"> What makes Nestling Bot different</h2>
+        <p class="justify-center align-center self-center text-1sm m-2 p-2 mx-10 text-center font-light">
+            We're an open source competitor to MEE6.
+            Nestling bot has <b>games, moderation commands, a bot panel, counting setup, suggestion setup, and other fun
+            commands that you can use.</b> <br> Nestling Bot is also a <b><i>solo project</i></b> that BlueRobin (me) made.
+        </p>
+
+        <div class="self-center align-center m-5 px-3 flex flex-col">
+            <h2 class="text-center justify-center align-center self-center text-3xl m-2 p-2">Here are some commands:</h2>
+            <ul class="m-2 p-1 list-disc align-center self-center text-light m-2 p-1">
+                <li>/2048 (runs a game of 2048 IN DISCORD!)</li>
+                <li>/rockpaperscissors (play rock paper scissors with friends)</li>
+                <li>/imaging emoji-art (generates emoji art from an image within discord!)</li>
+                <li>And many more commands related to moderation and server management.</li>
+            </ul>
+        </div>
+    </div>
+
+
 </div>
 {% endblock %}

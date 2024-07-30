@@ -61,7 +61,7 @@ async def index():
 
 @app.route('/about')
 async def about():
-    return flask.render_template('about.html',)
+    return flask.render_template('about.html', )
 
 
 @app.route('/auth/discord')
@@ -121,6 +121,11 @@ async def discord_login():
     con.close()
 
     return resp
+
+
+@app.route('/creator')
+async def creator():
+    return flask.render_template('creator.html')
 
 
 @app.route('/panel')
